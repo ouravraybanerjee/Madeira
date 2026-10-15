@@ -18,6 +18,19 @@
 #                                  delay-loads SystemFunction032 from it
 #   xaudio2_7                      the prefix registers CLSID_XAudio2 (2.7) at
 #                                  system32\xaudio2_7.dll
+#   wintypes                       Wine's apiset schema resolves
+#                                  api-ms-win-core-winrt-robuffer-l1-1-0
+#                                  (RoGetBufferMarshaler) and the rest of the
+#                                  WinRT surface here, so a 64-bit program that
+#                                  imports or activates WinRT needs it: Unity
+#                                  IL2CPP's GameAssembly.dll imports it (issue
+#                                  #230: dll-missing status=c0000135, then
+#                                  "Failed to load il2cpp"), and Rewired's
+#                                  Windows.Gaming.Input source loads the class
+#                                  DllPath C:\windows\system32\wintypes.dll,
+#                                  whose absence ends in an unhandled e06d7363.
+#                                  Its only imports are combase, ucrtbase,
+#                                  kernel32 and ntdll.
 # Pass the tracked modules a change touches (kernelbase, shell32, xinput1_1 ...
 # xinput1_4, ...) to rebuild them. ntdll is padded as well: build-ntdll.sh.
 #
@@ -40,7 +53,7 @@ STRIP="$TC/arm64ec-w64-mingw32-strip"
 case "${1:-}" in
     -h|--help) sed -n '2,/^set -eu/p' "${BASH_SOURCE[0]}" | sed '$d; s/^# \{0,1\}//'; exit 0 ;;
 esac
-[ $# -gt 0 ] || set -- cryptsp d3dx11_43 msvcp110 msvcr110 xaudio2_7
+[ $# -gt 0 ] || set -- cryptsp d3dx11_43 msvcp110 msvcr110 wintypes xaudio2_7
 [ -x "$STRIP" ] || { echo "llvm-mingw not found at $TC (docs/BUILDING.md)" >&2; exit 1; }
 
 targets=()
